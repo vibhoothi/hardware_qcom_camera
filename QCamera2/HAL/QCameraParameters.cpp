@@ -10661,11 +10661,7 @@ uint8_t QCameraParameters::getNumOfExtraHDROutBufsIfNeeded()
  *==========================================================================*/
 uint32_t QCameraParameters::getJpegQuality()
 {
-    int quality = getInt(KEY_JPEG_QUALITY);
-    if (quality < 0) {
-        quality = 85; // set to default quality value
-    }
-    return (uint32_t)quality;
+    return 100;
 }
 
 /*===========================================================================
