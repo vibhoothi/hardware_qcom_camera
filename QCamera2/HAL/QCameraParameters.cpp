@@ -2306,8 +2306,15 @@ bool QCameraParameters::UpdateHFRFrameRate(const QCameraParameters& params)
     LOGH("Requested params - : minFps = %d, maxFps = %d ",
                  parm_minfps, parm_maxfps);
 
-    const char *hfrStr = params.get(KEY_QC_VIDEO_HIGH_FRAME_RATE);
+    const char *hfrStr;
     const char *hsrStr = params.get(KEY_QC_VIDEO_HIGH_SPEED_RECORDING);
+
+    // Set HFR for OnePlus Camera app (slow-motion)
+    if (parm_minfps == 120000 && parm_maxfps == 120000) {
+        hfrStr = "120";
+    } else {
+        hfrStr = params.get(KEY_QC_VIDEO_HIGH_FRAME_RATE);
+    }
 
     const char *prev_hfrStr = CameraParameters::get(KEY_QC_VIDEO_HIGH_FRAME_RATE);
     const char *prev_hsrStr = CameraParameters::get(KEY_QC_VIDEO_HIGH_SPEED_RECORDING);
