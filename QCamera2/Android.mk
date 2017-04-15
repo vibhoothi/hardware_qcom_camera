@@ -73,6 +73,7 @@ LOCAL_C_INCLUDES := \
         system/core/include/cutils \
         system/core/include/system \
         system/media/camera/include/system
+        hardware/qcom/media-caf/msm8994/libstagefrighthw
 
 #HAL 1.0 Include paths
 LOCAL_C_INCLUDES += \

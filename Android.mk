@@ -1,4 +1,18 @@
-ifeq ($(call my-dir),$(call project-path-for,qcom-camera))
+ifeq ($(BOARD_BUILD_OP2_CAMERA),true)
+ifneq ($(strip $(USE_DEVICE_SPECIFIC_CAMERA)),true)
+
+MM_V4L2_DRIVER_LIST += msm8960
+MM_V4L2_DRIVER_LIST += msm8974
+MM_V4L2_DRIVER_LIST += msm8916
+MM_V4L2_DRIVER_LIST += msm8226
+MM_V4L2_DRIVER_LIST += msm8610
+MM_V4L2_DRIVER_LIST += apq8084
+MM_V4L2_DRIVER_LIST += mpq8092
+MM_V4L2_DRIVER_LIST += msm_bronze
+MM_V4L2_DRIVER_LIST += msm8916
+MM_V4L2_DRIVER_LIST += msm8994
+MM_V4L2_DRIVER_LIST += msm8084
+MM_V4L2_DRIVER_LIST += msm8992
 
 ifneq ($(strip $(USE_DEVICE_SPECIFIC_CAMERA)),true)
 # TODO:  Find a better way to separate build configs for ADP vs non-ADP devices
@@ -14,6 +28,6 @@ ifneq ($(TARGET_BOARD_AUTO),true)
     endif
   endif
 endif
-endif
 
+endif
 endif
