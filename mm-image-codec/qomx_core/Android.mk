@@ -7,8 +7,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_CFLAGS := -Werror \
-                   -g -O0
+omx_core_defines:= -Werror \
+                   -g -O3
 
 LOCAL_C_INCLUDES := frameworks/native/include/media/openmax \
                     $(LOCAL_PATH)/../qexif
