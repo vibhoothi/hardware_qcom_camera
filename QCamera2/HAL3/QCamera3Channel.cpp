@@ -52,6 +52,20 @@ using namespace android;
 
 namespace qcamera {
 #define IS_BUFFER_ERROR(x) (((x) & V4L2_BUF_FLAG_ERROR) == V4L2_BUF_FLAG_ERROR)
+static const char ExifAsciiPrefix[] =
+    { 0x41, 0x53, 0x43, 0x49, 0x49, 0x0, 0x0, 0x0 };          // "ASCII\0\0\0"
+static const char ExifUndefinedPrefix[] =
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };   // "\0\0\0\0\0\0\0\0"
+
+#define EXIF_ASCII_PREFIX_SIZE           8   //(sizeof(ExifAsciiPrefix))
+#define FOCAL_LENGTH_DECIMAL_PRECISION   100
+
+#define VIDEO_FORMAT    CAM_FORMAT_YUV_420_NV12
+#define SNAPSHOT_FORMAT CAM_FORMAT_YUV_420_NV21
+#define PREVIEW_FORMAT  CAM_FORMAT_YUV_420_NV21
+#define DEFAULT_FORMAT  CAM_FORMAT_YUV_420_NV21
+#define CALLBACK_FORMAT CAM_FORMAT_YUV_420_NV21
+#define RAW_FORMAT      CAM_FORMAT_BAYER_MIPI_RAW_8BPP_GBRG
 
 /*===========================================================================
  * FUNCTION   : QCamera3Channel
@@ -1801,39 +1815,27 @@ int32_t QCamera3RegularChannel::initialize(cam_is_type_t isType)
     }
 
 
-    if ((mStreamType == CAM_STREAM_TYPE_VIDEO) ||
-            (mStreamType == CAM_STREAM_TYPE_PREVIEW)) {
-        if ((mCamera3Stream->rotation != CAMERA3_STREAM_ROTATION_0) &&
-                ((mPostProcMask & CAM_QCOM_FEATURE_ROTATION) == 0)) {
-            LOGE("attempting rotation %d when rotation is disabled",
-                    mCamera3Stream->rotation);
-            return -EINVAL;
+    if (mCamera3Stream->format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+        if (mStreamType ==  CAM_STREAM_TYPE_VIDEO) {
+            streamFormat = VIDEO_FORMAT;
+        } else if (mStreamType == CAM_STREAM_TYPE_PREVIEW) {
+            streamFormat = PREVIEW_FORMAT;
+        } else {
+            //TODO: Add a new flag in libgralloc for ZSL buffers, and its size needs
+            // to be properly aligned and padded.
+            streamFormat = DEFAULT_FORMAT;
         }
-
-        switch (mCamera3Stream->rotation) {
-            case CAMERA3_STREAM_ROTATION_0:
-                mRotation = ROTATE_0;
-                break;
-            case CAMERA3_STREAM_ROTATION_90: {
-                mRotation = ROTATE_90;
-                break;
-            }
-            case CAMERA3_STREAM_ROTATION_180:
-                mRotation = ROTATE_180;
-                break;
-            case CAMERA3_STREAM_ROTATION_270: {
-                mRotation = ROTATE_270;
-                break;
-            }
-            default:
-                LOGE("Unknown rotation: %d",
-                         mCamera3Stream->rotation);
-            return -EINVAL;
-        }
-    } else if (mCamera3Stream->rotation != CAMERA3_STREAM_ROTATION_0) {
-        LOGE("Rotation %d is not supported by stream type %d",
-                mCamera3Stream->rotation,
-                mStreamType);
+    } else if(mCamera3Stream->format == HAL_PIXEL_FORMAT_YCbCr_420_888) {
+         streamFormat = CALLBACK_FORMAT;
+    } else if (mCamera3Stream->format == HAL_PIXEL_FORMAT_RAW_OPAQUE ||
+         mCamera3Stream->format == HAL_PIXEL_FORMAT_RAW10 ||
+         mCamera3Stream->format == HAL_PIXEL_FORMAT_RAW16) {
+         // Bayer pattern doesn't matter here.
+         // All CAMIF raw format uses 10bit.
+         streamFormat = RAW_FORMAT;
+    } else {
+        //TODO: Fail for other types of streams for now
+        ALOGE("%s: format is not IMPLEMENTATION_DEFINED or flexible", __func__);
         return -EINVAL;
     }
 

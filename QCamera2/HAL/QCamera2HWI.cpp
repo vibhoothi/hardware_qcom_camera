@@ -5155,8 +5155,6 @@ void QCamera2HardwareInterface::checkIntPicPending(bool JpegMemOpt, char *raw_fo
             //Attempting to restart preview after taking RAW snapshot
             stopChannel(QCAMERA_CH_TYPE_RAW);
             delChannel(QCAMERA_CH_TYPE_RAW);
-            //restoring the old raw format
-            property_set("persist.camera.raw.format", raw_format);
         }
 
         if (true == bSendToBackend) {
@@ -5235,9 +5233,7 @@ int QCamera2HardwareInterface::takeBackendPic_internal(bool *JpegMemOpt, char *r
         stopPreview();
 
         //getting the existing raw format type
-        property_get("persist.camera.raw.format", raw_format, "17");
-        //setting it to a default know value for this task
-        property_set("persist.camera.raw.format", "18");
+        property_get("persist.camera.raw.format", raw_format, "16");
 
         rc = addChannel(QCAMERA_CH_TYPE_RAW);
         if (rc == NO_ERROR) {
